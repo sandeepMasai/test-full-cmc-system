@@ -21,10 +21,13 @@ const app = express();
 const server = http.createServer(app);
 
 //  Allowed origins for dev + prod
-const allowedOrigins = [
    
-  'https://test-full-cmc-system-1.onrender.com',
-  'https://test-full-cmc-system.onrender.com',
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://crm-system-challenge.onrender.com',
+  'https://crm-system-challenge-1.onrender.com',
+  'https://test-full-cmc-system-1.onrender.com',   
 ];
 
 // Socket.io setup with safe CORS
@@ -36,21 +39,25 @@ const io = socketIo(server, {
   },
 });
 
-//  Dynamic CORS Middleware
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps, Postman)
-      if (!origin) return callback(null, true);
+      if (!origin) return callback(null, true); // allow non-browser requests (like Postman)
       if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
+        callback(null, true);
       } else {
-        return callback(new Error(`CORS policy: Origin ${origin} not allowed.`));
+        console.warn(`❌ CORS blocked: ${origin}`);
+        callback(new Error(`CORS policy: Origin ${origin} not allowed.`));
       }
     },
-    credentials: true,
+    credentials: true, // ✅ allow cookies & auth headers
   })
 );
+
+
+
+
+
 
 app.use(cookieParser());
 app.use(morgan('dev'));
