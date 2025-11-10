@@ -4,7 +4,8 @@ const api = axios.create({
     baseURL: 'https://test-full-cmc-system.onrender.com/api',
     headers: {
         'Content-Type': 'application/json'
-    }
+    },
+    withCredentials: false // Explicitly disable credentials - using token-based auth
 })
 
 // Add token to requests from localStorage

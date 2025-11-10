@@ -47,7 +47,9 @@ app.use(
         callback(new Error(`CORS policy: Origin ${origin} not allowed.`));
       }
     },
-    // No credentials needed - using token-based auth with localStorage
+    credentials: false, // Explicitly disable credentials - using token-based auth with localStorage
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 
