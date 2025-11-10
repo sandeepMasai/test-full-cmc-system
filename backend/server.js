@@ -20,14 +20,13 @@ const { initializeSocket } = require('./socket/socketHandler');
 const app = express();
 const server = http.createServer(app);
 
-//  Allowed origins for dev + prod
-   
+// Allowed origins for dev + prod
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
   'https://crm-system-challenge.onrender.com',
   'https://crm-system-challenge-1.onrender.com',
-  'https://test-full-cmc-system-1.onrender.com',   
+  'https://test-full-cmc-system-1.onrender.com',
 ];
 
 // Socket.io setup with safe CORS
@@ -54,20 +53,15 @@ app.use(
   })
 );
 
-
-
-
-
-
 app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//  Initialize Socket.io handlers
+// Initialize Socket.io handlers
 initializeSocket(io);
 
-//  API Routes
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/leads', authenticateToken, leadRoutes);
 app.use('/api/activities', authenticateToken, activityRoutes);
@@ -75,23 +69,7 @@ app.use('/api/dashboard', authenticateToken, dashboardRoutes);
 app.use('/api/notifications', authenticateToken, notificationRoutes);
 app.use('/api/integrations', integrationRoutes);
 
-//  Health Check Route
-app.get('/api', (req, res) => {
-  res.json({ status: 'OK', message: 'CRM API is running' });
-});
-
-//  Serve React frontend in production
-if (process.env.NODE_ENV === 'production') {
-  const __dirname = path.resolve();
-  app.use(express.static(path.join(__dirname, 'client', 'dist'))); // adjust if 'build' for CRA
-
-  // React Router fallback
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
-  });
-}
-
-//  Centralized Error Handler
+// Centralized Error Handler
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
   res.status(err.status || 500).json({
@@ -107,17 +85,17 @@ if (process.env.NODE_ENV !== 'test') {
   sequelize
     .authenticate()
     .then(() => {
-      console.log(' Database connection established successfully.');
+      console.log('✅ Database connection established successfully.');
       return sequelize.sync({ alter: process.env.NODE_ENV === 'development' });
     })
     .then(() => {
       server.listen(PORT, () => {
-        console.log(` Server is running on port ${PORT}`);
-        console.log(` Allowed Origins: ${allowedOrigins.join(', ')}`);
+        console.log(`🚀 Server is running on port ${PORT}`);
+        console.log(`🌐 Allowed Origins: ${allowedOrigins.join(', ')}`);
       });
     })
     .catch((err) => {
-      console.error(' Unable to connect to the database:', err);
+      console.error('❌ Unable to connect to the database:', err);
       process.exit(1);
     });
 }
