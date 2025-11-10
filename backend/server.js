@@ -59,7 +59,17 @@ app.use(express.urlencoded({ extended: true }));
 
 initializeSocket(io);
 
-// API Routes
+// Health check route
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Server is running' });
+});
+
+// Test route to verify API routing works
+app.post('/api/test', (req, res) => {
+  res.json({ status: 'ok', message: 'API routing is working', body: req.body });
+});
+
+// API Routes - must be before static file serving
 app.use('/api/auth', authRoutes);
 app.use('/api/leads', authenticateToken, leadRoutes);
 app.use('/api/activities', authenticateToken, activityRoutes);
@@ -68,12 +78,18 @@ app.use('/api/notifications', authenticateToken, notificationRoutes);
 app.use('/api/integrations', integrationRoutes);
 
 // ✅ Serve React frontend correctly in production
+// IMPORTANT: This must be AFTER all API routes
 if (process.env.NODE_ENV === 'production') {
   const __dirname = path.resolve();
   app.use(express.static(path.join(__dirname, 'client', 'dist')));
 
-  // Catch-all route for React Router (very important)
+  // Catch-all route for React Router - only for GET requests
+  // This won't interfere with API POST/PUT/DELETE requests
   app.get('*', (req, res) => {
+    // Skip API routes
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({ message: 'API route not found' });
+    }
     res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
   });
 }
