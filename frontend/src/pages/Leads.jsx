@@ -39,7 +39,7 @@ function Leads() {
 
     const fetchUsers = async () => {
         try {
-            const response = await api.get('/auth/users')
+            const response = await api.get('/auth/users/list')
             setUsers(response.data.users)
         } catch (error) {
             console.error('Error fetching users:', error)

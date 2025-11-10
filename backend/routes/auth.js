@@ -262,7 +262,23 @@ router.get('/me', authenticateToken, async (req, res) => {
     }
 });
 
-// Get all users (Admin/Manager only)
+// Get all users for assignment (all authenticated users can access this)
+// Returns basic user info for lead assignment, etc.
+router.get('/users/list', authenticateToken, async (req, res) => {
+    try {
+        const users = await User.findAll({
+            where: { isActive: true },
+            attributes: ['id', 'name', 'email', 'role'],
+            order: [['name', 'ASC']]
+        });
+
+        res.json({ users });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching users', error: error.message });
+    }
+});
+
+// Get all users (Admin/Manager only) - full user details
 router.get('/users', authenticateToken, authorizeRoles('Admin', 'Manager'), async (req, res) => {
     try {
         const users = await User.findAll({

@@ -43,7 +43,7 @@ app.use(
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) callback(null, true);
       else {
-        console.warn(`❌ CORS blocked: ${origin}`);
+        console.warn(` CORS blocked: ${origin}`);
         callback(new Error(`CORS policy: Origin ${origin} not allowed.`));
       }
     },
@@ -77,14 +77,13 @@ app.use('/api/dashboard', authenticateToken, dashboardRoutes);
 app.use('/api/notifications', authenticateToken, notificationRoutes);
 app.use('/api/integrations', integrationRoutes);
 
-// ✅ Serve React frontend correctly in production
-// IMPORTANT: This must be AFTER all API routes
+//  Serve React frontend correctly in production
+
 if (process.env.NODE_ENV === 'production') {
   const __dirname = path.resolve();
   app.use(express.static(path.join(__dirname, 'client', 'dist')));
 
   // Catch-all route for React Router - only for GET requests
-  // This won't interfere with API POST/PUT/DELETE requests
   app.get('*', (req, res) => {
     // Skip API routes
     if (req.path.startsWith('/api/')) {
@@ -110,17 +109,17 @@ if (process.env.NODE_ENV !== 'test') {
   sequelize
     .authenticate()
     .then(() => {
-      console.log('✅ Database connection established.');
+      console.log('Database connection established.');
       return sequelize.sync({ alter: process.env.NODE_ENV === 'development' });
     })
     .then(() => {
       server.listen(PORT, () => {
-        console.log(`🚀 Server running on port ${PORT}`);
-        console.log(`🌐 Allowed Origins: ${allowedOrigins.join(', ')}`);
+        console.log(` Server running on port ${PORT}`);
+        console.log(` Allowed Origins: ${allowedOrigins.join(', ')}`);
       });
     })
     .catch((err) => {
-      console.error('❌ Database connection failed:', err);
+      console.error(' Database connection failed:', err);
       process.exit(1);
     });
 }
