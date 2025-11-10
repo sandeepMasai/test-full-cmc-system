@@ -22,9 +22,9 @@ const server = http.createServer(app);
 
 //  Allowed origins for dev + prod
 const allowedOrigins = [
-   'http://localhost:3000',
-  'http://localhost:5173',
-  'https://crm-system-challenge-1.onrender.com',
+   
+  'https://test-full-cmc-system-1.onrender.com',
+  'https://test-full-cmc-system.onrender.com',
 ];
 
 // Socket.io setup with safe CORS
