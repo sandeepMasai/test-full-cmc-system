@@ -6,7 +6,10 @@ export const login = createAsyncThunk(
     async (credentials, { rejectWithValue }) => {
         try {
             const response = await api.post('/auth/login', credentials)
-            // Token is now stored in httpOnly cookie, only store user data
+            // Store token and user data in localStorage
+            if (response.data.token) {
+                localStorage.setItem('token', response.data.token)
+            }
             localStorage.setItem('user', JSON.stringify(response.data.user))
             return response.data
         } catch (error) {
@@ -36,7 +39,10 @@ export const register = createAsyncThunk(
     async (userData, { rejectWithValue }) => {
         try {
             const response = await api.post('/auth/register', userData)
-            // Token is now stored in httpOnly cookie, only store user data
+            // Store token and user data in localStorage
+            if (response.data.token) {
+                localStorage.setItem('token', response.data.token)
+            }
             localStorage.setItem('user', JSON.stringify(response.data.user))
             return response.data
         } catch (error) {
@@ -77,10 +83,12 @@ export const logout = createAsyncThunk(
         try {
             await api.post('/auth/logout')
             localStorage.removeItem('user')
+            localStorage.removeItem('token')
             return null
         } catch (error) {
             // Even if logout fails, clear local storage
             localStorage.removeItem('user')
+            localStorage.removeItem('token')
             return rejectWithValue(error.response?.data?.message || 'Failed to logout')
         }
     }
@@ -133,6 +141,7 @@ const authSlice = createSlice({
                 state.isAuthenticated = false
                 state.user = null
                 localStorage.removeItem('user')
+                localStorage.removeItem('token')
             })
             .addCase(register.pending, (state) => {
                 state.loading = true

@@ -50,14 +50,6 @@ router.post('/register',
                 { expiresIn: process.env.JWT_EXPIRE || '7d' }
             );
 
-            // Set httpOnly cookie
-            res.cookie('token', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-                sameSite: 'lax',
-                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-            });
-
             // Send welcome email to new user
             try {
                 await sendEmailNotification({
@@ -92,6 +84,7 @@ router.post('/register',
 
             res.status(201).json({
                 message: 'User registered successfully',
+                token,
                 user: {
                     id: user.id,
                     name: user.name,
@@ -150,16 +143,9 @@ router.post('/admin/register',
                 { expiresIn: process.env.JWT_EXPIRE || '7d' }
             );
 
-            // Set httpOnly cookie
-            res.cookie('token', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-                sameSite: 'lax',
-                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-            });
-
             res.status(201).json({
                 message: 'User created successfully',
+                token,
                 user: {
                     id: user.id,
                     name: user.name,
@@ -210,14 +196,6 @@ router.post('/login',
                 { expiresIn: process.env.JWT_EXPIRE || '7d' }
             );
 
-            // Set httpOnly cookie
-            res.cookie('token', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-                sameSite: 'lax',
-                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-            });
-
             // Send login notification email
             try {
                 await sendEmailNotification({
@@ -243,6 +221,7 @@ router.post('/login',
 
             res.json({
                 message: 'Login successful',
+                token,
                 user: {
                     id: user.id,
                     name: user.name,
@@ -257,14 +236,9 @@ router.post('/login',
     }
 );
 
-// Logout - Clear httpOnly cookie
+// Logout
 router.post('/logout', authenticateToken, async (req, res) => {
     try {
-        res.clearCookie('token', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax'
-        });
         res.json({ message: 'Logout successful' });
     } catch (error) {
         console.error('Logout error:', error);

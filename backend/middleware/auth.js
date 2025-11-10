@@ -3,17 +3,15 @@ const { User } = require('../models');
 
 const authenticateToken = async (req, res, next) => {
   try {
-    // ✅ Try to extract token from cookie or Authorization header
+    // ✅ Extract token from Authorization header only
     let token = null;
 
-    if (req.cookies && req.cookies.token) {
-      token = req.cookies.token;
-    } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
     }
 
     if (!token) {
-      console.warn('❌ No token found in cookies or headers');
+      console.warn('❌ No token found in Authorization header');
       return res.status(401).json({ message: 'Access token required' });
     }
 
