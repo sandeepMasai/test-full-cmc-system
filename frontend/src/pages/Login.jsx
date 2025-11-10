@@ -21,6 +21,14 @@ function Login() {
         try {
             const result = await dispatch(login({ email, password })).unwrap()
             if (result && result.user) {
+                // Verify token is stored before navigating
+                const token = localStorage.getItem('token')
+                if (!token) {
+                    console.error('❌ Token not stored after login!')
+                    toast.error('Login failed - token not stored')
+                    return
+                }
+                console.log('✅ Token stored successfully, navigating to dashboard')
                 toast.success(`Welcome back, ${result.user.name || 'User'}!`)
                 setTimeout(() => navigate('/'), 500)
             }

@@ -29,10 +29,21 @@ function Dashboard() {
 
     const fetchStats = async () => {
         try {
+            // Check if token exists before making request
+            const token = localStorage.getItem('token')
+            if (!token) {
+                console.error('❌ No token found in localStorage when fetching stats')
+                setLoading(false)
+                return
+            }
+            console.log('✅ Token found, making request to /dashboard/stats')
             const response = await api.get('/dashboard/stats')
             setStats(response.data.stats)
         } catch (error) {
             console.error('Error fetching stats:', error)
+            if (error.response?.status === 401) {
+                console.error('❌ Unauthorized - token might be invalid or expired')
+            }
         } finally {
             setLoading(false)
         }
