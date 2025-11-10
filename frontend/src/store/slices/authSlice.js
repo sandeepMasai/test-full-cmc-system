@@ -6,14 +6,31 @@ export const login = createAsyncThunk(
     async (credentials, { rejectWithValue }) => {
         try {
             const response = await api.post('/auth/login', credentials)
+            console.log('📦 Login response:', response.data)
+            
             // Store token and user data in localStorage
-            if (response.data.token) {
+            if (response.data && response.data.token) {
                 localStorage.setItem('token', response.data.token)
-                console.log('✅ Token stored in localStorage')
+                // Verify token was stored
+                const storedToken = localStorage.getItem('token')
+                if (storedToken === response.data.token) {
+                    console.log('✅ Token stored and verified in localStorage:', response.data.token.substring(0, 20) + '...')
+                } else {
+                    console.error('❌ Token storage failed - token mismatch')
+                    return rejectWithValue('Failed to store token')
+                }
             } else {
                 console.error('❌ No token in login response:', response.data)
+                return rejectWithValue('No token received from server')
             }
-            localStorage.setItem('user', JSON.stringify(response.data.user))
+            
+            if (response.data && response.data.user) {
+                localStorage.setItem('user', JSON.stringify(response.data.user))
+                console.log('✅ User stored in localStorage')
+            } else {
+                console.error('❌ No user in login response:', response.data)
+            }
+            
             return response.data
         } catch (error) {
             let errorMessage = 'Login failed'

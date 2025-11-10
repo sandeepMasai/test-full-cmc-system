@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const cookieParser = require('cookie-parser');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
@@ -34,7 +33,7 @@ const io = socketIo(server, {
   cors: {
     origin: allowedOrigins,
     methods: ['GET', 'POST'],
-    credentials: true,
+    // No credentials needed - using token-based auth
   },
 });
 
@@ -48,11 +47,10 @@ app.use(
         callback(new Error(`CORS policy: Origin ${origin} not allowed.`));
       }
     },
-    credentials: true,
+    // No credentials needed - using token-based auth with localStorage
   })
 );
 
-app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
