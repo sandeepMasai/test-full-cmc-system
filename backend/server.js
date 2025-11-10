@@ -20,7 +20,7 @@ const { initializeSocket } = require('./socket/socketHandler');
 const app = express();
 const server = http.createServer(app);
 
-// Allowed origins for dev + prod
+// Allowed origins
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
@@ -29,7 +29,7 @@ const allowedOrigins = [
   'https://test-full-cmc-system-1.onrender.com',
 ];
 
-// Socket.io setup with safe CORS
+// Socket.io setup
 const io = socketIo(server, {
   cors: {
     origin: allowedOrigins,
@@ -41,15 +41,14 @@ const io = socketIo(server, {
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow non-browser requests (like Postman)
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) callback(null, true);
+      else {
         console.warn(`❌ CORS blocked: ${origin}`);
         callback(new Error(`CORS policy: Origin ${origin} not allowed.`));
       }
     },
-    credentials: true, // ✅ allow cookies & auth headers
+    credentials: true,
   })
 );
 
@@ -58,7 +57,6 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Initialize Socket.io handlers
 initializeSocket(io);
 
 // API Routes
@@ -69,7 +67,18 @@ app.use('/api/dashboard', authenticateToken, dashboardRoutes);
 app.use('/api/notifications', authenticateToken, notificationRoutes);
 app.use('/api/integrations', integrationRoutes);
 
-// Centralized Error Handler
+// ✅ Serve React frontend correctly in production
+if (process.env.NODE_ENV === 'production') {
+  const __dirname = path.resolve();
+  app.use(express.static(path.join(__dirname, 'client', 'dist')));
+
+  // Catch-all route for React Router (very important)
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+  });
+}
+
+// Error Handler
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
   res.status(err.status || 500).json({
@@ -78,24 +87,24 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start Server + Connect Database
+// Start Server
 const PORT = process.env.PORT || 5000;
 
 if (process.env.NODE_ENV !== 'test') {
   sequelize
     .authenticate()
     .then(() => {
-      console.log('✅ Database connection established successfully.');
+      console.log('✅ Database connection established.');
       return sequelize.sync({ alter: process.env.NODE_ENV === 'development' });
     })
     .then(() => {
       server.listen(PORT, () => {
-        console.log(`🚀 Server is running on port ${PORT}`);
+        console.log(`🚀 Server running on port ${PORT}`);
         console.log(`🌐 Allowed Origins: ${allowedOrigins.join(', ')}`);
       });
     })
     .catch((err) => {
-      console.error('❌ Unable to connect to the database:', err);
+      console.error('❌ Database connection failed:', err);
       process.exit(1);
     });
 }
